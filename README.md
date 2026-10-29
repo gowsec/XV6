@@ -1,13 +1,44 @@
 # Project 1 — Xv6, Unix Utilities and System Call
 
+
 ## 1. Giới thiệu đồ án
 
-Đồ án thuộc môn **Operating System (Hệ điều hành)**, thực hiện trên hệ điều hành giáo dục **xv6** trong môi trường Linux.
+Đồ án thuộc môn **Operating System (Hệ điều hành)**, được thực hiện trên **xv6**, một hệ điều hành giáo dục do MIT phát triển, nhằm tìm hiểu các nguyên lý cơ bản của hệ điều hành thông qua việc lập trình và mở rộng chức năng trên mã nguồn thực tế.
 
-**Mục đích:** Làm quen với xv6, tìm hiểu cách chương trình người dùng sử dụng system call và cách bổ sung system call vào kernel. Đồ án gồm **4 bài tập**, chia thành hai nhóm:
+**Mục tiêu:** Làm quen với kiến trúc xv6, tìm hiểu cơ chế tương tác giữa chương trình người dùng (user space) và nhân hệ điều hành (kernel space), đồng thời thực hành xây dựng tiện ích Unix và bổ sung system call.
 
-- **User Program:** `xargs`, `tree` — xây dựng tiện ích chạy trong user space.
-- **System Call:** `tracing`, `procinfo` — mở rộng chức năng của kernel xv6.
+Đồ án gồm **4 bài tập**, chia thành hai nhóm:
+
+- **User Programs:** `xargs`, `tree` — phát triển các chương trình tiện ích chạy trong user space.
+- **System Calls:** `tracing`, `procinfo` — mở rộng chức năng của kernel thông qua cơ chế system call.
+
+### 1.1. Nền tảng mã nguồn xv6
+
+Dự án sử dụng mã nguồn **xv6-labs-2024** của MIT, cụ thể là branch `syscall`, làm nền tảng phát triển cho toàn bộ đồ án.
+
+Repository kế thừa các thành phần cốt lõi của xv6, bao gồm kernel, chương trình người dùng, hệ thống file, cấu hình biên dịch và công cụ kiểm thử. Các thành phần này tạo thành một môi trường hệ điều hành hoàn chỉnh ở mức tối giản, cho phép nhóm triển khai và kiểm chứng các chức năng theo yêu cầu mà không cần xây dựng hệ điều hành từ đầu.
+
+### 1.2. Kiến trúc và các thành phần chính
+
+Mã nguồn xv6 được tổ chức thành các thành phần với vai trò riêng biệt:
+
+- **`kernel/`**: Chứa mã nguồn nhân hệ điều hành, quản lý tiến trình, bộ nhớ, system call và các tài nguyên hệ thống.
+- **`user/`**: Chứa các chương trình chạy trong user space và thư viện hỗ trợ.
+- **`mkfs/`**: Cung cấp công cụ tạo filesystem image cho xv6.
+- **`Makefile`**: Quy định quá trình biên dịch kernel, chương trình người dùng và khởi chạy hệ điều hành.
+- **Các file cấu hình và công cụ kiểm thử**: Hỗ trợ quá trình phát triển, biên dịch và đánh giá kết quả thực hành.
+
+### 1.3. Môi trường thực thi
+
+Nhóm sử dụng **Ubuntu Linux** làm môi trường phát triển và **QEMU** để giả lập phần cứng, khởi chạy xv6.
+
+xv6 hoạt động bên trong QEMU, không thay thế hệ điều hành Ubuntu của máy ảo.
+
+Quy trình thực hành:
+
+`Mã nguồn xv6 → Biên dịch bằng Makefile → Khởi chạy bằng QEMU → Phát triển và kiểm thử`
+
+
 
 ## 2. Cấu hình môi trường (Local VM)
 
@@ -25,30 +56,64 @@
 | RISC-V toolchain | _Chưa cập nhật_ |
 | Repository / branch / commit xv6 gốc | _Chưa cập nhật_ |
 
+
 ## 3. Cấu trúc thư mục đồ án
 
-> **Cấu trúc minh họa:** Chỉ liệt kê các thư mục và file liên quan trực tiếp đến bốn bài. Cấu trúc chính xác sẽ được cập nhật theo repository xv6 mà nhóm sử dụng. Những file ghi `(mới)` là file dự kiến bổ sung, không phải tất cả đều được đề bài quy định tên.
+Repository được xây dựng trên mã nguồn **xv6-labs-2024 (branch `syscall`)**. Cấu trúc dưới đây trình bày các thành phần chính của xv6 và những file liên quan trực tiếp đến bốn bài tập.
+
+> **Lưu ý:** Đây là cấu trúc rút gọn, không liệt kê toàn bộ mã nguồn xv6. Các file được đánh dấu `[Dự kiến]` là những file nhóm sẽ bổ sung trong quá trình triển khai, chưa tồn tại trong mã nguồn ban đầu.
 
 ```text
 XV6/
-├── Makefile                 # Đăng ký chương trình người dùng trong UPROGS
-├── kernel/
-│   ├── param.h              # Hằng số hệ thống (ví dụ MAXARG)
-│   ├── proc.h               # Cấu trúc và thông tin tiến trình
-│   ├── proc.c               # Quản lý tiến trình, fork()
-│   ├── syscall.h            # Mã số system call
-│   ├── syscall.c            # Điều phối system call
-│   ├── sysproc.c            # Các hàm xử lý system call liên quan tiến trình
-│   └── procinfo.h           # (mới, đề xuất) Khai báo struct procinfo
-└── user/
-    ├── user.h               # Khai báo các hàm dùng ở user space
-    ├── usys.pl              # Sinh system call stubs
-    ├── ls.c                 # Mã tham khảo cho bài tree
-    ├── trace.c              # Chương trình trace được đề cung cấp
-    ├── xargs.c              # (mới) Bài 1: xargs
-    ├── tree.c               # (mới) Bài 2: tree
-    └── procinfotest.c       # (mới, đề xuất) Kiểm thử procinfo
+├── .editorconfig             # Quy tắc định dạng mã nguồn
+├── .gitignore                # Các file và thư mục Git bỏ qua
+├── .dir-locals.el            # Cấu hình cho Emacs
+├── .gdbinit.tmpl-riscv       # Cấu hình mẫu cho GDB
+├── LICENSE                   # Giấy phép mã nguồn xv6
+├── README                    # Tài liệu gốc của xv6
+├── README.md                 # Tài liệu đồ án của nhóm
+├── Makefile                  # Biên dịch xv6 và đăng ký UPROGS
+├── grade-lab-syscall         # Công cụ kiểm tra bài lab syscall
+├── gradelib.py               # Thư viện hỗ trợ kiểm thử
+│
+├── conf/                     # Các file cấu hình
+├── mkfs/                     # Công cụ tạo filesystem image
+│
+├── kernel/                   # Mã nguồn kernel xv6
+│   ├── main.c                # Khởi tạo và khởi động kernel
+│   ├── param.h               # Các hằng số hệ thống
+│   ├── proc.h                # Khai báo cấu trúc tiến trình
+│   ├── proc.c                # Quản lý tiến trình và fork()
+│   ├── syscall.h             # Định nghĩa số hiệu system call
+│   ├── syscall.c             # Điều phối system call
+│   ├── sysproc.c             # Xử lý system call liên quan tiến trình
+│   └── procinfo.h            # [Dự kiến] Khai báo struct procinfo
+│
+└── user/                     # Chương trình và thư viện user space
+    ├── user.h                # Khai báo các hàm và system call
+    ├── usys.pl               # Sinh mã gọi system call
+    ├── ls.c                  # Chương trình ls, tham khảo cho tree
+    ├── trace.c               # Chương trình trace có sẵn
+    ├── xargs.c               # [Dự kiến] Bài 1: xargs
+    ├── tree.c                # [Dự kiến] Bài 2: tree
+    └── procinfotest.c        # [Dự kiến] Chương trình kiểm thử procinfo
 ```
+
+### 3.1. Phạm vi phát triển
+
+Các bài tập được triển khai trực tiếp trên mã nguồn xv6 hiện có:
+
+| Bài tập | File phát triển chính | Hình thức |
+|---------|-----------------------|-----------|
+| xargs | `user/xargs.c`, `Makefile` | Tạo chương trình mới, cập nhật Makefile |
+| tree | `user/tree.c`, `Makefile` | Tạo chương trình mới, cập nhật Makefile |
+| tracing | `kernel/syscall.c`, `kernel/proc.c`, `kernel/proc.h` và các file liên quan | Mở rộng cơ chế system call |
+| procinfo | `kernel/proc.c`, `kernel/proc.h`, `kernel/sysproc.c` và các file liên quan | Bổ sung system call lấy thông tin tiến trình |
+
+Các thành viên chỉ chỉnh sửa những thành phần cần thiết cho bài tập được phân công. Những file nền tảng khác được giữ nguyên, trừ khi có yêu cầu kỹ thuật cụ thể.
+
+> **Lưu ý tích hợp:** Hai bài `tracing` và `procinfo` có thể cùng chỉnh sửa một số file trong `kernel/` và `user/`. Các thay đổi cần được kiểm tra và phối hợp khi tạo Pull Request vào nhánh `dev` để hạn chế merge conflict.
+
 
 ## 4. Nội dung các bài tập
 
