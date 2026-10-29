@@ -54,7 +54,11 @@ Quy trình thực hành:
 | Dung lượng ổ đĩa | _Chưa cập nhật_ |
 | Phiên bản QEMU | _Chưa cập nhật_ |
 | RISC-V toolchain | _Chưa cập nhật_ |
-| Repository / branch / commit xv6 gốc | _Chưa cập nhật_ |
+| Repository xv6 gốc | `git://g.csail.mit.edu/xv6-labs-2024` |
+| Branch xv6 gốc | `syscall` |
+| Commit xv6 gốc | `d5b09ff4571e07f6d996fdf7ce1533afc19a6978` |
+| Commit nhập mã nguồn vào repository nhóm | `efcb79c` |
+
 
 
 ## 3. Cấu trúc thư mục đồ án
@@ -93,7 +97,7 @@ XV6/
     ├── user.h                # Khai báo các hàm và system call
     ├── usys.pl               # Sinh mã gọi system call
     ├── ls.c                  # Chương trình ls, tham khảo cho tree
-    ├── trace.c               # Chương trình trace có sẵn
+    ├── trace.c               # Chương trình trace có sẵn trong mã nguồn xv6
     ├── xargs.c               # [Dự kiến] Bài 1: xargs
     ├── tree.c                # [Dự kiến] Bài 2: tree
     └── procinfotest.c        # [Dự kiến] Chương trình kiểm thử procinfo
@@ -103,16 +107,20 @@ XV6/
 
 Các bài tập được triển khai trực tiếp trên mã nguồn xv6 hiện có:
 
-| Bài tập | File phát triển chính | Hình thức |
+| Bài tập | File phát triển chính | Công việc |
 |---------|-----------------------|-----------|
-| xargs | `user/xargs.c`, `Makefile` | Tạo chương trình mới, cập nhật Makefile |
-| tree | `user/tree.c`, `Makefile` | Tạo chương trình mới, cập nhật Makefile |
-| tracing | `kernel/syscall.c`, `kernel/proc.c`, `kernel/proc.h` và các file liên quan | Mở rộng cơ chế system call |
-| procinfo | `kernel/proc.c`, `kernel/proc.h`, `kernel/sysproc.c` và các file liên quan | Bổ sung system call lấy thông tin tiến trình |
+| xargs | `user/xargs.c`, `Makefile` | Tạo chương trình xargs và đăng ký trong UPROGS |
+| tree | `user/tree.c`, `Makefile` | Tạo chương trình tree và đăng ký trong UPROGS |
+| tracing | `kernel/syscall.h`, `kernel/syscall.c`, `kernel/sysproc.c`, `kernel/proc.h`, `kernel/proc.c`, `user/user.h`, `user/usys.pl`, `Makefile` | Triển khai system call `trace(mask)`, sử dụng `user/trace.c` có sẵn và đăng ký chương trình `_trace` trong `UPROGS` |
+| procinfo | `kernel/syscall.h`, `kernel/syscall.c`, `kernel/sysproc.c`, `kernel/proc.h`, `kernel/proc.c`, `user/user.h`, `user/usys.pl`, `Makefile` | Triển khai system call procinfo và đăng ký chương trình kiểm thử trong UPROGS nếu cần |
+
 
 Các thành viên chỉ chỉnh sửa những thành phần cần thiết cho bài tập được phân công. Những file nền tảng khác được giữ nguyên, trừ khi có yêu cầu kỹ thuật cụ thể.
 
 > **Lưu ý tích hợp:** Hai bài `tracing` và `procinfo` có thể cùng chỉnh sửa một số file trong `kernel/` và `user/`. Các thay đổi cần được kiểm tra và phối hợp khi tạo Pull Request vào nhánh `dev` để hạn chế merge conflict.
+
+
+> **Lưu ý:** Mã nguồn xv6 ban đầu chưa đăng ký các chương trình `xargs`, `tree`, `trace` và `procinfotest` trong `UPROGS`. Nhóm cần cập nhật `Makefile` tương ứng với những chương trình được triển khai. Các system call được đăng ký thông qua cơ chế system call của kernel, không trực tiếp qua `UPROGS`.
 
 
 ## 4. Nội dung các bài tập
