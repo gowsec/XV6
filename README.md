@@ -45,15 +45,13 @@ Quy trình thực hành:
 
 | Thành phần | Thông tin |
 |---|---|
-| Máy chủ (Host OS) | _Chưa cập nhật_ |
-| Phần mềm ảo hóa | _Chưa cập nhật_ |
-| Hệ điều hành máy ảo (Guest OS) | _Chưa cập nhật_ |
-| Kiến trúc CPU máy ảo | _Chưa cập nhật_ |
-| Số vCPU | _Chưa cập nhật_ |
-| RAM | _Chưa cập nhật_ |
-| Dung lượng ổ đĩa | _Chưa cập nhật_ |
-| Phiên bản QEMU | _Chưa cập nhật_ |
-| RISC-V toolchain | _Chưa cập nhật_ |
+| Hệ điều hành máy ảo (Guest OS) | 	Ubuntu 22.04 LTS hoặc tương thích |
+| Số vCPU | 2 |
+| RAM | Khoảng 3.8 GiB |
+| Dung lượng ổ đĩa | 20GB |
+| Git | 2.34.1 hoặc tương thích |
+| Phiên bản QEMU | 6.2.0 |
+| RISC-V toolchain | riscv64-unknown-elf-gcc 10.2.0 |
 | Repository xv6 gốc | `git://g.csail.mit.edu/xv6-labs-2024` |
 | Branch xv6 gốc | `syscall` |
 | Commit xv6 gốc | `d5b09ff4571e07f6d996fdf7ce1533afc19a6978` |
@@ -117,7 +115,7 @@ Các bài tập được triển khai trực tiếp trên mã nguồn xv6 hiện
 
 Các thành viên chỉ chỉnh sửa những thành phần cần thiết cho bài tập được phân công. Những file nền tảng khác được giữ nguyên, trừ khi có yêu cầu kỹ thuật cụ thể.
 
-> **Lưu ý tích hợp:** Hai bài `tracing` và `procinfo` có thể cùng chỉnh sửa một số file trong `kernel/` và `user/`. Các thay đổi cần được kiểm tra và phối hợp khi tạo Pull Request vào nhánh `dev` để hạn chế merge conflict.
+> **Lưu ý tích hợp:** Hai bài `tracing` và `procinfo` cùng chỉnh sửa một số file đăng ký system call. Nhóm sẽ sử dụng commit nền chung để thống nhất số hiệu syscall và các khai báo cần thiết trước khi triển khai logic riêng. Quy trình phối hợp chi tiết được trình bày tại mục **Git Workflow → Phối hợp triển khai System Call**.
 
 
 > **Lưu ý:** Mã nguồn xv6 ban đầu chưa đăng ký các chương trình `xargs`, `tree`, `trace` và `procinfotest` trong `UPROGS`. Nhóm cần cập nhật `Makefile` tương ứng với những chương trình được triển khai. Các system call được đăng ký thông qua cơ chế system call của kernel, không trực tiếp qua `UPROGS`.
@@ -195,6 +193,36 @@ Nhóm sử dụng Git và GitHub để quản lý mã nguồn, theo dõi tiến 
 4. Các thành viên review code trước khi merge.
 5. Sau khi tích hợp, nhóm build và kiểm thử toàn bộ chức năng trên `dev`.
 6. Khi phiên bản ổn định, nhóm trưởng merge `dev` vào `main`.
+
+### Phối hợp triển khai System Call (Tracing và Procinfo)
+
+Hai bài `tracing` và `procinfo` cùng chỉnh sửa một số file đăng ký system call. Để tránh trùng số hiệu, sai lệch khai báo và hạn chế merge conflict, nhóm thống nhất quy trình phối hợp như sau:
+
+**1. Chuẩn bị phần khai báo chung**
+
+- Nhóm trưởng kiểm tra và thống nhất số hiệu `SYS_trace`, `SYS_procinfo` dựa trên các số hiệu hiện có trong `kernel/syscall.h`.
+- Chuẩn bị một commit nền chung chứa các khai báo và đăng ký cần thiết cho cả hai system call.
+- Commit nền được tích hợp vào `dev` trước khi hai thành viên tiếp tục triển khai phần logic riêng.
+
+**2. Đồng bộ feature branch**
+
+Sau khi commit nền được merge vào `dev`:
+
+- Thành viên 3 đồng bộ `dev` vào `feature/procinfo`.
+- Thành viên 4 đồng bộ `dev` vào `feature/tracing`.
+- Không tự ý thay đổi số hiệu system call đã thống nhất.
+
+**3. Phân chia phần triển khai**
+
+- **Thành viên 3 — Procinfo:** triển khai `getprocinfo()`, `sys_procinfo()` và chương trình kiểm thử `procinfotest`.
+- **Thành viên 4 — Tracing:** triển khai `sys_trace()`, trace mask, cơ chế kế thừa qua `fork()` và logic in log syscall.
+
+**4. Tích hợp và kiểm thử**
+
+- Mỗi thành viên tạo Pull Request từ feature branch vào `dev`.
+- Kiểm tra và xử lý merge conflict nếu có.
+- Sau khi cả hai chức năng được tích hợp, build và kiểm thử lại toàn bộ.
+- Đặc biệt kiểm tra `procinfo` khi chạy thông qua `trace` để bảo đảm hai system call hoạt động tương thích.
 
 **Lưu ý:**
 - Không trực tiếp push code lên `main`.
