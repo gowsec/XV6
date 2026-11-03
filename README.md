@@ -91,14 +91,16 @@ XV6/
 │   ├── sysproc.c             # Xử lý system call liên quan tiến trình
 │   └── procinfo.h            # [Dự kiến] Khai báo struct procinfo
 │
-└── user/                     # Chương trình và thư viện user space
-    ├── user.h                # Khai báo các hàm và system call
-    ├── usys.pl               # Sinh mã gọi system call
-    ├── ls.c                  # Chương trình ls, tham khảo cho tree
-    ├── trace.c               # Chương trình trace có sẵn trong mã nguồn xv6
-    ├── xargs.c               # [Dự kiến] Bài 1: xargs
-    ├── tree.c                # [Dự kiến] Bài 2: tree
-    └── procinfotest.c        # [Dự kiến] Chương trình kiểm thử procinfo
+├── user/                     # Chương trình và thư viện user space
+│   ├── user.h                # Khai báo các hàm và system call
+│   ├── usys.pl               # Sinh mã gọi system call
+│   ├── ls.c                  # Chương trình ls, tham khảo cho tree
+│   ├── trace.c               # Chương trình trace có sẵn trong mã nguồn xv6
+│   ├── xargs.c               # [Dự kiến] Bài 1: xargs
+│   ├── tree.c                # [Dự kiến] Bài 2: tree
+│   └── procinfotest.c        # [Dự kiến] Chương trình kiểm thử procinfo
+│
+└── report/
 ```
 
 ### 3.1. Phạm vi phát triển
