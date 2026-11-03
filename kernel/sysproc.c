@@ -91,3 +91,17 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// Placeholder: implemented in the tracing task (issue #4).
+uint64
+sys_trace(void)
+{
+  return -1;
+}
+
+// Placeholder: implemented in the procinfo task (issue #5).
+uint64
+sys_procinfo(void)
+{
+  return -1;
+}
