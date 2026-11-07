@@ -92,11 +92,16 @@ sys_uptime(void)
   return xticks;
 }
 
-// Placeholder: implemented in the tracing task (issue #4).
+// trace(mask): print the system calls whose bit is set in mask,
+// for this process and the children it forks afterwards.
 uint64
 sys_trace(void)
 {
-  return -1;
+  int mask;
+
+  argint(0, &mask);
+  myproc()->tracemask = mask;
+  return 0;
 }
 
 // Placeholder: implemented in the procinfo task (issue #5).

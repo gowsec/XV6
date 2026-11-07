@@ -171,6 +171,14 @@ syscall(void)
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
+
+    // Check the mask only now: the return value is in a0, and a call
+    // to trace() has just set the mask, so its own line is printed too.
+    // An int mask has 32 bits, so only syscall numbers below 32 fit.
+    if(num < 32 && (((uint)p->tracemask >> num) & 1)){
+      char *name = syscallnames[num] ? syscallnames[num] : "?";
+      printf("%d: syscall %s -> %d\n", p->pid, name, (int)p->trapframe->a0);
+    }
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);
