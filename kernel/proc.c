@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "procinfo.h"
 
 struct cpu cpus[NCPU];
 
@@ -697,3 +698,36 @@ procdump(void)
     printf("\n");
   }
 }
+
+// Retrieve process information by PID.
+// Returns 0 on success, -1 on failure.
+int
+getprocinfo(int pid, struct procinfo *pi)
+{
+  struct proc *p;
+
+  if(pid <= 0 || pi == 0)
+    return -1;
+
+  acquire(&wait_lock);
+  for(p = proc; p < &proc[NPROC]; p++){
+    acquire(&p->lock);
+    if(p->state != UNUSED && p->pid == pid){
+      pi->pid = p->pid;
+      if(p->parent)
+        pi->ppid = p->parent->pid;
+      else
+        pi->ppid = 0;
+      pi->state = p->state;
+      pi->sz = p->sz;
+      safestrcpy(pi->name, p->name, sizeof(pi->name));
+      release(&p->lock);
+      release(&wait_lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+  release(&wait_lock);
+  return -1;
+}
+

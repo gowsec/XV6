@@ -5,6 +5,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "procinfo.h"
 
 uint64
 sys_exit(void)
@@ -104,9 +105,25 @@ sys_trace(void)
   return 0;
 }
 
-// Placeholder: implemented in the procinfo task (issue #5).
+// Retrieve process information by PID and write back to user space.
 uint64
 sys_procinfo(void)
 {
-  return -1;
+  int pid;
+  uint64 uaddr;
+  struct procinfo info;
+
+  argint(0, &pid);
+  argaddr(1, &uaddr);
+
+  if(pid <= 0)
+    return -1;
+
+  if(getprocinfo(pid, &info) < 0)
+    return -1;
+
+  if(copyout(myproc()->pagetable, uaddr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+
+  return 0;
 }
