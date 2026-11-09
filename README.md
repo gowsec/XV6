@@ -161,7 +161,44 @@ Bổ sung system call `procinfo(int pid, struct procinfo *info)` để lấy th�
 
 ### Bài 2 — tree
 
-> TODO: Cập nhật sau khi hoàn thành.
+**Mô tả:** `tree [thư mục]` in cấu trúc thư mục dạng cây: duyệt đệ quy, thụt lề 2 dấu cách mỗi tầng, thư mục có `/` ở cuối, bỏ qua `.` và `..`. Không có tham số thì dùng `.`.
+
+**File:** `user/tree.c`, đăng ký `$U/_tree\` trong `UPROGS` của `Makefile`.
+
+**Lệnh kiểm thử** (gõ trong xv6, sau khi `make qemu`):
+
+```text
+$ mkdir a
+$ echo > a/b
+$ mkdir a/aa
+$ echo > a/aa/b
+$ echo > a/aa/c
+$ mkdir a/ab
+$ echo > a/ab/d
+$ tree a
+```
+
+**Kết quả mong đợi** (theo đề) — **kết quả thực tế giống hoàn toàn**:
+
+```text
+a/
+  b
+  aa/
+    b
+    c
+  ab/
+    d
+```
+
+**Các trường hợp kiểm thử thêm:**
+
+| Lệnh | Kết quả mong đợi | Kết quả thực tế |
+|---|---|---|
+| `tree .` | In `./`, sau đó toàn bộ file trong thư mục hiện tại, kể cả `a/` và các thư mục con | Đúng |
+| `tree` (không tham số) | Giống `tree .` | Đúng |
+| `tree /` | Dòng gốc là `/` (không bị `//`), in toàn bộ filesystem | Đúng |
+| `mkdir a/aa/aaa`, `echo > a/aa/aaa/file`, `tree a` | `aaa/` thụt 2 tầng, `file` thụt 3 tầng | Đúng |
+| `tree khongco` | In `tree: cannot open khongco` và thoát với mã lỗi 1 | Đúng |
 
 ### Bài 3 — tracing
 
